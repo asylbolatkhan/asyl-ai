@@ -1,0 +1,82 @@
+/* GaitLens analysis layer — uses the Asyl AI tokens (--card, --ink, --muted, --line, --accent, --soft). */
+:root { --gl-good: #0B7A55; --gl-bad: #B33636; --gl-good-mark: #0E9F6E; --gl-bad-mark: #D64545; }
+html[data-theme=dark] { --gl-good: #4FD1A1; --gl-bad: #FF8A8A; }
+
+/* key finding */
+.gl-key { margin-bottom: 18px; border-left: 4px solid var(--accent); }
+.gl-key h2 { margin: 0 0 14px; }
+.gl-key-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--line); }
+.gl-k { padding: 14px 16px 6px 0; display: flex; flex-direction: column; gap: 4px; }
+.gl-k + .gl-k { padding-left: 16px; border-left: 1px solid var(--line); }
+.gl-k strong { font-size: 40px; line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.gl-k strong span { font-size: 18px; color: var(--muted); font-weight: 500; }
+.gl-k.good strong { color: var(--gl-good); }
+.gl-k.bad strong { color: var(--gl-bad); }
+.gl-k > span { font-size: 13px; color: var(--muted); line-height: 1.35; }
+.gl-key p { max-width: 80ch; margin: 12px 0 0; }
+
+/* doctor summary */
+.gl-sum-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+.gl-sum-head h2 { margin: 2px 0 8px; }
+.gl-toggle { display: inline-flex; background: var(--soft); border-radius: 999px; padding: 3px; }
+.gl-toggle button { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 12.5px; padding: 5px 12px;
+  border-radius: 999px; cursor: pointer; min-height: 0; box-shadow: none; }
+.gl-toggle button[aria-pressed="true"] { background: var(--card); color: var(--ink); font-weight: 650; box-shadow: 0 0 0 1px var(--line); }
+.gl-text { max-height: 560px; overflow: auto; padding-right: 4px; }
+.gl-text h4 { margin: 12px 0 4px; font-size: 14px; }
+.gl-text ul { margin: 0; padding: 0; list-style: none; }
+.gl-text li { position: relative; padding-left: 16px; margin: 5px 0; font-size: 13.5px; line-height: 1.5; }
+.gl-text li::before { content: ""; position: absolute; left: 0; top: .55em; width: 7px; height: 7px; border-radius: 50%; background: var(--line); }
+.gl-text li.better::before { background: var(--gl-good-mark); }
+.gl-text li.worse::before { background: var(--gl-bad-mark); border-radius: 1px; transform: rotate(45deg); }
+.gl-text li.note::before { background: var(--ink); }
+.gl-text p { margin: 6px 0; font-size: 13.5px; }
+.gl-text details { margin-top: 10px; }
+.gl-text summary { cursor: pointer; font-weight: 600; color: var(--accent); }
+.gl-acc { margin: 12px 0 4px; padding: 10px 12px; background: var(--soft); border-radius: 10px; font-size: 13px; }
+
+/* gait ghost */
+.gl-ghost { stroke-width: 11; stroke-linecap: round; stroke-linejoin: round; opacity: .38; }
+
+/* ML */
+.gl-ml-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin: 10px 0 4px; }
+.gl-ml h3 { font-size: 14px; margin: 10px 0 8px; }
+.gl-bar { display: grid; grid-template-columns: 150px 1fr 48px; align-items: center; gap: 10px; margin: 8px 0; font-size: 13px; }
+.gl-bar i { display: block; height: 14px; border-radius: 0 4px 4px 0; background: var(--accent); }
+.gl-bar.ref i { background: #8C94A8; }
+.gl-bar b { font-variant-numeric: tabular-nums; }
+.gl-imp { margin: 0 0 8px; padding-left: 20px; }
+.gl-imp li { margin: 3px 0; }
+
+@media (max-width: 900px) { .gl-key-row { grid-template-columns: 1fr 1fr; } .gl-k:nth-child(3) { border-left: 0; padding-left: 0; } .gl-ml-grid { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .gl-key-row { grid-template-columns: 1fr; } .gl-k + .gl-k { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); } .gl-bar { grid-template-columns: 110px 1fr 42px; } }
+@media print { .gl-toggle { display: none !important; } .gl-text { max-height: none; overflow: visible; } }
+
+/* ---------- layout: use the full width, no scattered blocks ---------- */
+.shell { max-width: min(1760px, calc(100vw - 48px)) !important; padding: 24px 0 !important; margin: 0 auto !important; }
+header { padding-left: max(24px, calc((100vw - 1760px) / 2)) !important; padding-right: max(24px, calc((100vw - 1760px) / 2)) !important; }
+.workbench.gl-two { grid-template-columns: minmax(280px, 1fr) minmax(0, 2.6fr) !important; align-items: stretch !important; }
+.workbench.gl-two > * { height: 100%; margin: 0; }
+.workbench.gl-two .chart-card { height: 100%; }
+.metrics-strip, .detailgrid { align-items: stretch; }
+.detailgrid > * { height: 100%; }
+.detailgrid > section > .card { height: 100%; }
+.gl-sum { margin: 14px 0; }
+.gl-sum .gl-text { max-height: none; overflow: visible; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 36px; }
+.gl-sum .gl-text section { break-inside: avoid; }
+.gl-sum .gl-text section h4 { margin-top: 10px; }
+.hero .hero-demo-toggle { display: none !important; }
+
+/* ---------- human figure ---------- */
+.gait-figure svg.gl-fig { height: 300px !important; width: 100%; }
+.gl-ghost-fig { opacity: .32; }
+.gl-person .far-arm, .gl-person .far-leg, .gl-person .far-foot { opacity: .38; }
+.gl-person .head, .gl-ghost-fig .head { fill: var(--card); }
+.gl-person .far-arm { opacity: .45; }
+
+@media (max-width: 1200px) { .gl-sum .gl-text { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 900px) {
+  .workbench.gl-two { grid-template-columns: minmax(0, 1fr) !important; }
+  .gl-sum .gl-text { grid-template-columns: minmax(0, 1fr); }
+  .shell { max-width: calc(100vw - 24px) !important; }
+}
