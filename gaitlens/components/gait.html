@@ -1,0 +1,179 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: Onest; src: url("/app/static/fonts/onest-latin.woff2") format("woff2"); font-weight: 400 700;
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @font-face { font-family: Onest; src: url("/app/static/fonts/onest-cyrillic.woff2") format("woff2"); font-weight: 400 700;
+    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+  @font-face { font-family: Onest; src: url("/app/static/fonts/onest-cyrillic-ext.woff2") format("woff2"); font-weight: 400 700;
+    unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+  :root { --ink:#14213D; --muted:#55657A; --line:#D9E0E7; --surface:#F2F5F8; --focus:#3451D1; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: transparent; color: var(--ink);
+    font: 14px/1.45 Onest, Inter, "Segoe UI", sans-serif; font-variant-numeric: tabular-nums; }
+  .wrap { border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px 12px; background: #fff; }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .title { font-weight: 600; font-size: 15px; }
+  .seg { display: inline-flex; background: var(--surface); border-radius: 999px; padding: 3px; }
+  .seg button { border: 0; background: transparent; font: inherit; font-size: 13px; color: var(--muted);
+    padding: 4px 12px; border-radius: 999px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .seg button[aria-pressed="true"] { background: #fff; color: var(--ink); font-weight: 600;
+    box-shadow: 0 0 0 1px var(--line); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  svg.stage { display: block; width: 100%; height: 330px; margin-top: 4px; }
+  .read { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13px; color: var(--muted); min-height: 20px; }
+  .read b { color: var(--ink); font-weight: 600; }
+  .ctrl { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+  .play { width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--ink); color: #fff; cursor: pointer;
+    display: grid; place-items: center; flex: none; }
+  .play svg { width: 14px; height: 14px; fill: #fff; }
+  .track { position: relative; flex: 1; }
+  input[type=range] { width: 100%; accent-color: var(--ink); margin: 0; }
+  .track { padding-bottom: 16px; }
+  .tick { position: absolute; top: 20px; transform: translateX(-50%); font-size: 11px; color: var(--muted); white-space: nowrap; pointer-events: none; }
+  .legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
+  .legend i { display: inline-block; width: 18px; height: 0; border-top-width: 4px; border-top-style: solid; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+  .cap { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="title" id="title"></div>
+    <div class="seg" role="group" id="seg"></div>
+  </div>
+  <svg class="stage" id="stage" viewBox="0 0 460 330" preserveAspectRatio="xMidYMid meet" role="img"></svg>
+  <div class="read" aria-live="off"><span id="phase"></span><span id="angles"></span></div>
+  <div class="ctrl">
+    <button class="play" id="play" type="button"></button>
+    <div class="track"><span class="tick" id="tick"></span>
+      <input type="range" id="scrub" min="0" max="1000" value="0" step="1"></div>
+  </div>
+  <div class="legend" id="legend"></div>
+  <div class="cap" id="cap"></div>
+</div>
+<script>
+(() => {
+const D = /*__DATA__*/null;
+const L = D.labels, C = D.colors;
+const NS = "http://www.w3.org/2000/svg";
+const W = 460, H = 330, N = D.pct.length - 1;
+const conds = ["Verbal", "VR"].filter(c => D.frames[c]);
+let cond = D.initial || conds[0];
+const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let playing = !reduce, t = reduce ? 0.5 : 0, last = null;
+const CYCLE_MS = 1300;
+
+// ---- geometry: fit pelvis top .. ground into the stage
+const TORSO = 0.42, HEAD_R = 0.085;
+const TOP = 0.34 + TORSO + 2 * HEAD_R, ground = D.ground;
+const scale = (H - 36) / (TOP - ground);
+const ox = W * 0.5, oy = 12 + TOP * scale;
+const X = x => ox + x * scale, Y = y => oy - y * scale;
+const groundY = Y(ground);
+
+// treadmill belt speed (normalised units per cycle) from Baseline heel travel during stance
+const bh = D.frames.Baseline.points.heel;
+const beltSpeed = Math.max(0.4, (bh[0][0] - bh[25][0]) / 0.5);
+
+const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]); (parent || svg).appendChild(e); return e; };
+const svg = document.getElementById("stage");
+svg.setAttribute("aria-label", L.aria);
+
+// belt
+const belt = el("g", {});
+el("line", {x1: 20, x2: W - 20, y1: groundY, y2: groundY, stroke: "#C7D0DA", "stroke-width": 1.5}, belt);
+const dashes = el("g", {}, belt);
+const DASH_GAP = 26;
+for (let i = 0; i < Math.ceil(W / DASH_GAP) + 2; i++)
+  el("line", {x1: i * DASH_GAP, x2: i * DASH_GAP + 10, y1: groundY + 7, y2: groundY + 7, stroke: "#D9E0E7", "stroke-width": 2, "stroke-linecap": "round"}, dashes);
+const clip = el("clipPath", {id: "beltclip"}); el("rect", {x: 20, y: groundY, width: W - 40, height: 16}, clip);
+dashes.setAttribute("clip-path", "url(#beltclip)");
+
+function figure(color, width, opacity, joints) {
+  const g = el("g", {opacity});
+  const pel = el("line", {stroke: color, "stroke-width": width + 2, "stroke-linecap": "round"}, g);
+  const leg = el("polyline", {fill: "none", stroke: color, "stroke-width": width, "stroke-linecap": "round", "stroke-linejoin": "round"}, g);
+  const foot = el("line", {stroke: color, "stroke-width": width, "stroke-linecap": "round"}, g);
+  const js = joints ? ["hip", "knee", "ankle"].map(() => el("circle", {r: 4.5, fill: "#fff", stroke: color, "stroke-width": 2}, g)) : [];
+  return {g, pel, leg, foot, js, color};
+}
+// schematic torso + head (not measured: context only), drawn behind everything
+const torso = el("line", {stroke: "#D3DAE2", "stroke-width": 7, "stroke-linecap": "round"});
+const head = el("circle", {r: HEAD_R * scale, fill: "none", stroke: "#D3DAE2", "stroke-width": 3});
+const far = figure(C[cond], 4, 0.28, false);      // other leg: same curves shifted by half a cycle
+const ghost = figure(C.Baseline, 9, 0.38, false);
+const fig = figure(C[cond], 5, 1, true);
+
+const lerp = (a, b, f) => a + (b - a) * f;
+function at(frames, name, i, f) { const p = frames.points[name]; const a = p[i], b = p[Math.min(i + 1, N)];
+  return [lerp(a[0], b[0], f), lerp(a[1], b[1], f)]; }
+function val(arr, i, f) { return lerp(arr[i], arr[Math.min(i + 1, N)], f); }
+
+function draw(fg, frames, i, f) {
+  const P = n => at(frames, n, i, f), hip = P("hip"), knee = P("knee"), ankle = P("ankle"), heel = P("heel"), toe = P("toe"), pel = P("pelvis");
+  fg.pel.setAttribute("x1", X(hip[0])); fg.pel.setAttribute("y1", Y(hip[1]));
+  fg.pel.setAttribute("x2", X(pel[0])); fg.pel.setAttribute("y2", Y(pel[1]));
+  fg.leg.setAttribute("points", [hip, knee, ankle].map(p => X(p[0]) + "," + Y(p[1])).join(" "));
+  fg.foot.setAttribute("x1", X(heel[0])); fg.foot.setAttribute("y1", Y(heel[1]));
+  fg.foot.setAttribute("x2", X(toe[0])); fg.foot.setAttribute("y2", Y(toe[1]));
+  [hip, knee, ankle].forEach((p, k) => { if (fg.js[k]) { fg.js[k].setAttribute("cx", X(p[0])); fg.js[k].setAttribute("cy", Y(p[1])); } });
+}
+
+const phaseEl = document.getElementById("phase"), anglesEl = document.getElementById("angles"), scrub = document.getElementById("scrub");
+function render() {
+  const pos = t * N, i = Math.min(Math.floor(pos), N - 1), f = pos - i;
+  const pos2 = ((t + 0.5) % 1) * N, i2 = Math.min(Math.floor(pos2), N - 1), f2 = pos2 - i2;
+  draw(far, D.frames[cond], i2, f2);
+  draw(ghost, D.frames.Baseline, i, f);
+  draw(fig, D.frames[cond], i, f);
+  const pt = at(D.frames[cond], "pelvis", i, f);
+  torso.setAttribute("x1", X(pt[0])); torso.setAttribute("y1", Y(pt[1]));
+  torso.setAttribute("x2", X(pt[0])); torso.setAttribute("y2", Y(pt[1] + TORSO));
+  head.setAttribute("cx", X(pt[0])); head.setAttribute("cy", Y(pt[1] + TORSO + HEAD_R));
+  dashes.setAttribute("transform", `translate(${-((t * beltSpeed * scale) % DASH_GAP)},0)`);
+  const pct = Math.round(t * 100), ph = D.phases[Math.min(Math.round(t * N), N)];
+  phaseEl.innerHTML = `<b>${pct}%</b>&ensp;${L.phases[ph]}`;
+  const hb = val(D.frames.Baseline.hip, i, f), hc = val(D.frames[cond].hip, i, f);
+  const pb = val(D.frames.Baseline.pelvis, i, f), pc = val(D.frames[cond].pelvis, i, f);
+  anglesEl.innerHTML = `${L.hip}: <b>${hb.toFixed(0)}° → ${hc.toFixed(0)}°</b>&nbsp;&nbsp;${L.pelvis}: <b>${pb.toFixed(0)}° → ${pc.toFixed(0)}°</b>`;
+  if (document.activeElement !== scrub) scrub.value = Math.round(t * 1000);
+}
+
+function loop(ts) {
+  if (last !== null && playing) t = (t + (ts - last) / CYCLE_MS) % 1;
+  last = ts; render(); requestAnimationFrame(loop);
+}
+
+// controls
+const playBtn = document.getElementById("play");
+const ICON_PLAY = '<svg viewBox="0 0 14 14"><path d="M3 1.5v11l9-5.5z"/></svg>';
+const ICON_PAUSE = '<svg viewBox="0 0 14 14"><path d="M2.5 1.5h3.2v11H2.5zM8.3 1.5h3.2v11H8.3z"/></svg>';
+function setPlaying(p) { playing = p; playBtn.innerHTML = p ? ICON_PAUSE : ICON_PLAY; playBtn.setAttribute("aria-label", p ? L.pause : L.play); }
+playBtn.onclick = () => setPlaying(!playing);
+scrub.addEventListener("input", () => { setPlaying(false); t = scrub.value / 1000; });
+scrub.setAttribute("aria-label", L.scrub);
+
+const seg = document.getElementById("seg");
+function setCond(c) { cond = c; [fig, far].forEach(g => g.g.querySelectorAll("[stroke]").forEach(n => n.setAttribute("stroke", C[c])));
+  seg.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.c === c)); renderLegend(); }
+conds.forEach(c => { const b = document.createElement("button"); b.type = "button"; b.dataset.c = c;
+  b.innerHTML = `<span class="dot" style="background:${C[c]}"></span>${L.conds[c]}`; b.onclick = () => setCond(c); seg.appendChild(b); });
+
+const tick = document.getElementById("tick");
+tick.style.left = D.toeOff + "%"; tick.textContent = "↓ " + L.toeOff;
+document.getElementById("title").textContent = L.title;
+document.getElementById("cap").textContent = L.caption;
+function renderLegend() { document.getElementById("legend").innerHTML =
+  `<span><i style="border-color:${C.Baseline};opacity:.55"></i>${L.conds.Baseline}</span>` +
+  `<span><i style="border-color:${C[cond]}"></i>${L.conds[cond]}</span>`; }
+
+setCond(cond); setPlaying(playing); render(); requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

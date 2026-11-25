@@ -1,0 +1,17 @@
+[theme]
+base = "light"
+primaryColor = "#14213D"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F2F5F8"
+textColor = "#14213D"
+font = "Onest, Inter, 'Segoe UI', sans-serif"
+
+[server]
+headless = true
+enableStaticServing = true
+
+[client]
+toolbarMode = "viewer"
+
+[browser]
+gatherUsageStats = false

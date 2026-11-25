@@ -1,0 +1,7 @@
+Discrete_Parameters_Baseline.csv (text/comma-separated-values) 104429 bytes.
+Discrete_Parameters_VR.csv (text/comma-separated-values) 104913 bytes.
+Discrete_Parameters_Verbal.csv (text/comma-separated-values) 105063 bytes.
+Kinematics_Kinetics_Baseline.csv (text/comma-separated-values) 2680485 bytes.
+Kinematics_Kinetics_VR.csv (text/comma-separated-values) 2700627 bytes.
+Kinematics_Kinetics_Verbal.csv (text/comma-separated-values) 2700079 bytes.
+README_DataFiles.txt (text/plain) 7457 bytes.

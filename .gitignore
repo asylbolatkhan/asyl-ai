@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.playwright-mcp/
+*.log
+.env
+.streamlit/secrets.toml
+# event materials (not part of the solution)
+WhatsApp Image*
+gait-cp-brief-ru.pdf

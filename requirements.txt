@@ -1,0 +1,11 @@
+streamlit>=1.50
+pandas>=2.2
+numpy>=2.0
+scipy>=1.13
+scikit-learn>=1.6
+plotly>=6.0
+pytest>=8.0
+# Optional: AI text refinement of the doctor summary (scripts/export_web.py --llm, key in .env)
+openai>=1.0
+python-dotenv>=1.0
+# anthropic   # alternative provider for the Streamlit version (ANTHROPIC_API_KEY)

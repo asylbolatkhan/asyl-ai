@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="kk">
+<head>
+<meta charset="utf-8">
+<title>Asyl AI — Solveathon 2026</title>
+<style>
+@font-face { font-family: Onest; src: url("../static/fonts/onest-latin.woff2") format("woff2"); font-weight: 400 700;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: Onest; src: url("../static/fonts/onest-cyrillic.woff2") format("woff2"); font-weight: 400 700;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: Onest; src: url("../static/fonts/onest-cyrillic-ext.woff2") format("woff2"); font-weight: 400 700;
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+@page { size: 1920px 1080px; margin: 0; }
+:root { --navy: #0B1233; --navy2: #121A45; --ink: #F3F4FF; --muted: #AEB4D6; --violet: #8A7CFF; --violet2: #6C5CE7;
+  --teal: #2CC5CF; --gray: #A3AABD; --good: #4FD1A1; --bad: #FF8A8A; --line: rgba(255,255,255,.14);
+  --paper: #F5F5FA; --paper-ink: #17182D; --paper-muted: #5D6280; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: #050816; }
+body { font-family: Onest, Inter, "Segoe UI", sans-serif; color: var(--ink); font-variant-numeric: tabular-nums; }
+.slide { width: 1920px; height: 1080px; position: relative; overflow: hidden; background: var(--navy) center/cover no-repeat;
+  padding: 96px 110px; page-break-after: always; break-after: page; }
+.slide.light { background: var(--paper); color: var(--paper-ink); }
+.bg-wave { background-image: url("img/bg_wave.jpg"); }
+.bg-curve { background-image: url("img/bg_curve.jpg"); }
+.bg-path { background-image: url("img/bg_path.jpg"); }
+.bg-plain { background-image: url("img/bg_plain.jpg"); }
+h1 { font-size: 128px; line-height: 1; letter-spacing: -.035em; font-weight: 700; }
+h2 { font-size: 76px; line-height: 1.04; letter-spacing: -.03em; font-weight: 700; }
+.rule { width: 190px; height: 7px; border-radius: 4px; margin: 30px 0 40px;
+  background: linear-gradient(90deg, var(--violet2), rgba(108,92,231,0)); }
+.lead { font-size: 34px; line-height: 1.4; color: var(--ink); max-width: 30ch; }
+.lead em { font-style: normal; color: var(--violet); font-weight: 650; }
+.light .lead { color: var(--paper-ink); }
+.muted { color: var(--muted); }
+.light .muted { color: var(--paper-muted); }
+.small { font-size: 22px; line-height: 1.45; color: var(--muted); }
+.light .small { color: var(--paper-muted); }
+.pnum { position: absolute; right: 70px; bottom: 50px; font-size: 20px; color: var(--muted); }
+.cut { position: absolute; mix-blend-mode: screen; }
+.shot { border-radius: 18px; box-shadow: 0 30px 80px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.12); display: block; }
+.dot { display: inline-block; width: 18px; height: 18px; border-radius: 50%; vertical-align: middle; margin-right: 12px; }
+
+/* 1 title */
+.s1 h1 { font-size: 168px; }
+.s1 .tag { font-size: 58px; font-weight: 700; color: var(--violet); line-height: 1.12; letter-spacing: -.02em; }
+.s1 .sub { font-size: 36px; line-height: 1.4; margin-top: 44px; max-width: 24ch; }
+.s1 .meta { position: absolute; left: 110px; bottom: 96px; font-size: 28px; color: var(--violet); font-weight: 650; }
+.s1 .meta span { color: var(--muted); font-weight: 400; margin-left: 18px; }
+
+/* 2 problem */
+.figs { display: flex; gap: 0; margin-top: 56px; border-top: 1px solid var(--line); }
+.figs > div { padding: 26px 46px 0 0; }
+.figs > div + div { padding-left: 46px; border-left: 1px solid var(--line); }
+.figs b { display: block; font-size: 84px; line-height: 1; letter-spacing: -.03em; }
+.figs span { font-size: 24px; color: var(--muted); }
+.csv { position: absolute; right: 0; top: 610px; width: 820px; padding: 30px 34px; background: #F7F8FC; color: #2A2F52;
+  border-radius: 22px 0 0 22px; font: 17px/1.75 Consolas, "Cascadia Mono", monospace; white-space: pre; overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+.csv b { color: #6C5CE7; }
+.csv .nan { color: #D64545; font-weight: 700; }
+.csv-cap { position: absolute; right: 110px; top: 950px; width: 700px; font-size: 22px; color: var(--muted); line-height: 1.45; }
+.qs { position: absolute; left: 110px; bottom: 100px; width: 900px; }
+.qs p { font-size: 30px; line-height: 1.4; margin-top: 18px; }
+.qs p b { color: var(--violet); }
+
+/* 3 data */
+.conds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 10px; }
+.cond { background: rgba(255,255,255,.05); border: 1px solid var(--line); border-radius: 22px; padding: 30px 32px; }
+.cond h3 { font-size: 36px; margin-bottom: 10px; }
+.cond p { font-size: 25px; line-height: 1.45; color: var(--muted); }
+.measures { display: grid; grid-template-columns: 1fr 1fr; gap: 26px 70px; margin-top: 52px; }
+.measures div { font-size: 27px; line-height: 1.45; }
+.measures b { color: var(--violet); }
+
+/* 4 solution */
+.s4 .shot { position: absolute; right: -40px; top: 120px; width: 1130px; }
+.feat { margin-top: 44px; display: grid; gap: 26px; max-width: 640px; }
+.feat div { font-size: 28px; line-height: 1.38; padding-left: 26px; border-left: 4px solid var(--violet2); }
+.feat b { display: block; font-size: 32px; }
+
+/* 5 finding (light) */
+.s5 h2 { font-size: 70px; max-width: 24ch; }
+.big { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 60px; border-top: 2px solid #E2E3EE; }
+.big > div { padding: 34px 40px 0 0; }
+.big > div + div { padding-left: 40px; border-left: 2px solid #E2E3EE; }
+.big b { font-size: 150px; line-height: .95; letter-spacing: -.05em; display: block; }
+.big b small { font-size: 48px; color: var(--paper-muted); font-weight: 500; letter-spacing: 0; }
+.big .g b { color: #0B7A55; } .big .r b { color: #B33636; }
+.big span { display: block; font-size: 28px; line-height: 1.35; margin-top: 16px; color: var(--paper-ink); max-width: 15ch; }
+.big i { display: block; font-style: normal; font-size: 21px; color: var(--paper-muted); margin-top: 10px; }
+.why { margin-top: 64px; font-size: 34px; line-height: 1.45; max-width: 60ch; }
+.why b { color: var(--violet2); }
+
+/* 6 patient */
+.s6 .a { position: absolute; left: 110px; top: 330px; width: 1700px; }
+.s6 .b { position: absolute; left: 640px; top: 96px; width: 1170px; }
+.s6 .lead { font-size: 30px; max-width: none; }
+.s6 ul { margin-top: 20px; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; }
+.s6 li { font-size: 23px; line-height: 1.35; margin-top: 12px; padding-left: 30px; position: relative; }
+.s6 li::before { content: ""; position: absolute; left: 0; top: 12px; width: 12px; height: 12px; border-radius: 50%; background: var(--violet); }
+
+/* 7 AI */
+.ai { display: grid; grid-template-columns: 1fr 1fr; gap: 30px 36px; margin-top: 12px; }
+.ai > div { background: rgba(255,255,255,.05); border: 1px solid var(--line); border-radius: 22px; padding: 30px 34px; min-height: 290px; }
+.ai h3 { font-size: 34px; margin-bottom: 12px; }
+.ai h3 i { font-style: normal; color: var(--violet); margin-right: 12px; }
+.ai p { font-size: 24px; line-height: 1.45; color: var(--muted); }
+.ai p b { color: var(--ink); }
+.bars { margin-top: 16px; display: grid; gap: 10px; }
+.bar { display: grid; grid-template-columns: 280px 1fr 80px; align-items: center; gap: 16px; font-size: 21px; color: var(--muted); }
+.bar u { display: block; height: 18px; border-radius: 0 5px 5px 0; background: var(--violet2); text-decoration: none; }
+.bar u.ref { background: #6D7392; }
+.bar b { color: var(--ink); font-size: 24px; }
+
+/* 8 trust (light) */
+.trust { display: grid; grid-template-columns: repeat(3, 1fr); gap: 34px; margin-top: 20px; }
+.trust div { background: #fff; border-radius: 22px; padding: 34px 34px; box-shadow: 0 6px 24px rgba(32,35,75,.07); }
+.trust h3 { font-size: 34px; margin-bottom: 14px; }
+.trust p { font-size: 24px; line-height: 1.5; color: var(--paper-muted); }
+.trustnums { margin-top: 44px; } .trustnums b { font-size: 96px; color: var(--violet2); } .trustnums span { max-width: 18ch; }
+.limits { margin-top: 44px; font-size: 25px; line-height: 1.5; color: var(--paper-muted); max-width: 90ch; }
+.limits b { color: var(--paper-ink); }
+
+/* 9 demo (light) */
+.steps9 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 20px; }
+.steps9 div { background: #E9E9FA; border-radius: 22px; padding: 34px 36px; }
+.steps9 b { font-size: 54px; color: var(--violet2); display: block; line-height: 1; }
+.steps9 h3 { font-size: 34px; margin: 18px 0 10px; }
+.steps9 p { font-size: 24px; line-height: 1.45; color: var(--paper-muted); }
+.links { margin-top: 70px; display: grid; gap: 34px; width: 640px; }
+.links div { font-size: 26px; color: var(--paper-muted); }
+.links a { display: block; margin-top: 8px; font-size: 32px; font-weight: 650; color: var(--violet2); text-decoration: none; word-break: break-all; }
+
+/* 10 end */
+.s10 .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; margin-top: 10px; max-width: 1150px; }
+.s10 p { font-size: 28px; line-height: 1.45; margin-bottom: 22px; }
+.s10 h3 { font-size: 30px; color: var(--violet); margin-bottom: 16px; }
+.s10 li { font-size: 22px; line-height: 1.45; margin: 0 0 12px 24px; color: var(--muted); }
+.s10 li b { color: var(--ink); }
+.thanks { position: absolute; left: 110px; bottom: 92px; font-size: 48px; font-weight: 700; color: var(--violet); }
+</style>
+</head>
+<body>
+
+<!-- 1 -->
+<section class="slide s1 bg-wave">
+  <h1>Asyl AI</h1>
+  <div class="rule"></div>
+  <div class="tag">«Әр қадам —<br>жаңа мүмкіндік»</div>
+  <p class="sub">ДЦП бар балалардың жүрісін талдайтын дәрігер көмекшісі</p>
+  <img class="cut" src="img/legs.png" style="right:240px;top:0;height:1080px" alt="">
+  <div class="meta">Solveathon 2026<span>AI &amp; Medicine · мектеп трегі</span></div>
+</section>
+
+<!-- 2 -->
+<section class="slide bg-plain">
+  <h2>Мәселе</h2>
+  <div class="rule"></div>
+  <p class="lead">Дәрігердің сұрағы қарапайым: <em>кері байланыс балаға көмектесті ме?</em></p>
+  <div class="figs">
+    <div><b>29</b><span>бала</span></div>
+    <div><b>3</b><span>жүріс жағдайы</span></div>
+    <div><b>2 606</b><span>қадам циклі</span></div>
+    <div><b>260</b><span>баған әр файлда</span></div>
+  </div>
+  <div class="csv"><b>subject;side;weight;height;LegLength;GPS_a;GVS_aSagP;</b>…
+s61520_22;RIGHT;46,5;1,39;0,722;11,26797376;17,14258936;…;<span class="nan">NaN</span>
+s61520_22;RIGHT;46,5;1,39;0,722;10,61662848;15,90022101;…;<span class="nan">NaN</span>
+s61520_22;RIGHT;46,5;1,39;0,722;10,97156801;16,21744925;…;<span class="nan">NaN</span>
+s61520_22;RIGHT;46,5;1,39;0,722;10,78145679;16,80416083;…;<span class="nan">NaN</span>
+s61520_22;RIGHT;46,5;1,39;0,722;10,69241240;17,20114445;…;<span class="nan">NaN</span>
+<b>aSagP_pct_GC_0;aSagP_pct_GC_20;aSagP_pct_GC_40;</b>…
+17,60977936;19,13068575;20,94675448;22,77046615;…</div>
+  <p class="csv-cap">Нақты деректер осылай көрінеді: үтірмен жазылған сандар, бос мәндер, бір файлда жүздеген баған.</p>
+  <div class="qs">
+    <p>Қолмен салыстыру <b>сағаттар алады</b>.</p>
+    <p>Көрсеткіш көп, <b>маңыздысы көрінбей қалады</b>.</p>
+    <p>Бір буын жақсарса, <b>басқасы нашарлауы мүмкін</b>.</p>
+  </div>
+  <div class="pnum">2</div>
+</section>
+
+<!-- 3 -->
+<section class="slide bg-curve">
+  <h2>Деректер</h2>
+  <div class="rule"></div>
+  <div class="conds">
+    <div class="cond"><h3><span class="dot" style="background:#A3AABD"></span>Baseline</h3><p>Бала тренажерде кәдімгідей жүреді, ешқандай нұсқау жоқ.</p></div>
+    <div class="cond"><h3><span class="dot" style="background:#8A7CFF"></span>Verbal</h3><p>Маман «аяғыңды артқа толық түзе» деп ауызша айтып тұрады.</p></div>
+    <div class="cond"><h3><span class="dot" style="background:#2CC5CF"></span>VR</h3><p>Бала экраннан өз аватарын көріп, ұршығын түзетеді.</p></div>
+  </div>
+  <div class="measures">
+    <div><b>GPS</b> — жүрістің қалыпты жүрістен жалпы ауытқуы. Аз болса, жақсы.</div>
+    <div><b>Ұршықтың ең кіші бұрышы</b> — кері байланыстың басты мақсаты: ұршық қаншалықты түзеледі.</div>
+    <div><b>5 қисық × 51 нүкте</b> — жамбас, ұршық, тізе, тобық бұрыштары және ұршық моменті бүкіл цикл бойы.</div>
+    <div><b>Сапа</b> — бос мәндер өңделеді: бір баланың ұршық моменті мүлде жоқ, екеуінде бір циклде жоқ.</div>
+  </div>
+  <p class="small" style="margin-top:46px">KU Leuven, 2024 · ашық және иесіздендірілген деректер · CC-BY-NC-SA-4.0 · doi.org/10.48804/JUNNWW</p>
+  <div class="pnum">3</div>
+</section>
+
+<!-- 4 -->
+<section class="slide s4 bg-plain">
+  <h2>Біздің<br>шешіміміз</h2>
+  <div class="rule"></div>
+  <p class="lead" style="max-width:20ch">Браузерде ашылатын платформа: <em>орнату қажет емес</em></p>
+  <div class="feat">
+    <div><b>Үш жағдайды салыстыру</b>Графиктер, кесте, қадам циклі бойынша қисықтар</div>
+    <div><b>ЖИ қорытындысы</b>Не жақсарды, не нашарлады, дәрігер тілімен</div>
+    <div><b>Жүріс анимациясы</b>Баланың нақты буын бұрыштарымен</div>
+    <div><b>Есеп</b>PDF және CSV, қазақша және орысша</div>
+  </div>
+  <img class="shot" src="shots/dashboard.png" alt="Asyl AI талдау беті">
+  <div class="pnum">4</div>
+</section>
+
+<!-- 5 -->
+<section class="slide s5 light">
+  <h2>Ұршық түзелді, бірақ бала мұны жамбасты еңкейту арқылы жасады</h2>
+  <div class="big">
+    <div class="g"><b>26<small>/29</small></b><span>балада VR кезінде ұршық толығырақ түзелді</span><i>орт. −4,2°, p &lt; 0,001</i></div>
+    <div class="g"><b>22<small>/29</small></b><span>балада ауызша нұсқаумен</span><i>орт. −3,5°, p = 0,001</i></div>
+    <div class="r"><b>21<small>/29</small></b><span>балада жалпы жүріс (GPS) VR кезінде нашарлады</span><i>орт. +0,9°, p = 0,03</i></div>
+    <div class="r"><b>24<small>/29</small></b><span>балада жамбас ауытқуы өсті</span><i>орт. +2,4°, p &lt; 0,001</i></div>
+  </div>
+  <p class="why">Кері байланыс өз мақсатына жетеді, бірақ бала оны <b>жамбасты алға көбірек еңкейту</b> арқылы жасайды. Сондықтан ұршықпен бірге жамбасты да бақылау керек.</p>
+  <p class="small" style="margin-top:26px">Әр баланың орташа мәні бойынша Wilcoxon тесті, Holm түзетуі. Топтық нәтиже, диагноз емес.</p>
+  <div class="pnum">5</div>
+</section>
+
+<!-- 6 -->
+<section class="slide s6 bg-plain">
+  <h2>Пациент<br>картасы</h2>
+  <div class="rule"></div>
+  <img class="shot a" src="shots/patient.png" alt="Пациент картасы мен ЖИ қорытындысы">
+  <div class="b">
+    <p class="lead">Дәрігер баланы таңдайды, платформа бәрін бір бетте көрсетеді.</p>
+    <ul>
+      <li>Үш жағдайдың көрсеткіштері мен айырмасы</li>
+      <li>ЖИ қорытындысы: GPT мәтіні немесе есептелген нұсқа, бір батырмамен ауысады</li>
+      <li>Жүріс анимациясы: сұр фигура — сол баланың Baseline жүрісі</li>
+      <li>Маманның жазбасы және бір беттік есеп</li>
+    </ul>
+  </div>
+  <div class="pnum">6</div>
+</section>
+
+<!-- 7 -->
+<section class="slide bg-curve">
+  <h2>Жасанды интеллект</h2>
+  <div class="rule" style="margin-bottom:30px"></div>
+  <div class="ai">
+    <div><h3><i>1</i>Маңызды өзгерістер</h3><p>Әр көрсеткіш бойынша статистикалық тест және әсер өлшемі. Ең маңыздысы бірінші шығады. GPS үшін <b>1,6° клиникалық шекара</b> ескеріледі.</p></div>
+    <div><h3><i>2</i>Күмәнді қадамдар</h3><p>Баланың өз «типтік» қадамынан қатты ерекшеленетін циклдер табылады: робаст z-score және IsolationForest. Барлығы <b>139 цикл</b> белгіленді.</p></div>
+    <div><h3><i>3</i>Жағдайды тану</h3><p>Модель жеке қадамға қарап жағдайды анықтайды. Бала оқытуға қатыспай, бөлек тексеріледі.</p>
+      <div class="bars">
+        <div class="bar">Кері байланыс бар ма<u style="width:86%"></u><b>86%</b></div>
+        <div class="bar">кездейсоқ деңгей<u class="ref" style="width:59%"></u><b>59%</b></div>
+        <div class="bar">Baseline / Verbal / VR<u style="width:62%"></u><b>62%</b></div>
+        <div class="bar">кездейсоқ деңгей<u class="ref" style="width:44%"></u><b>44%</b></div>
+      </div></div>
+    <div><h3><i>4</i>Дәрігерге мәтін</h3><p>Есептелген сандардан қазақша және орысша қорытынды құралады. <b>GPT-5.4</b> оны түсінікті етіп қайта жазады, ал мәтіндегі <b>әр сан автоматты тексеріледі</b>: деректерде жоқ сан болса, мәтін қабылданбайды.</p></div>
+  </div>
+  <div class="pnum">7</div>
+</section>
+
+<!-- 8 -->
+<section class="slide light">
+  <h2>Адал әрі қауіпсіз</h2>
+  <div class="rule"></div>
+  <div class="trust">
+    <div><h3>Диагноз қоймайды</h3><p>Платформа ем тағайындамайды, тек дәрігерге анықтама береді. Әр бетте осы ескерту тұр.</p></div>
+    <div><h3>Адал тексеру</h3><p>Модель бір баланың қадамдарын оқытуда да, тексеруде де қолданбайды. Бұл кодта тексеріледі, 42 автоматты тест бар.</p></div>
+    <div><h3>Деректер шықпайды</h3><p>CSV браузерде өңделеді. ЖИ кілті сайтта жоқ: мәтіндер алдын ала, тек есептелген сандардан жасалған.</p></div>
+  </div>
+  <div class="big trustnums">
+    <div><b>29<small>/29</small></b><span>бала бөлек тексерілді</span></div>
+    <div><b>42</b><span>автоматты тест</span></div>
+    <div><b>0</b><span>пациент дерегі серверге жіберілмейді</span></div>
+    <div><b>58<small>/58</small></b><span>ЖИ мәтіні сандар тексеруінен өтті</span></div>
+  </div>
+  <p class="limits"><b>Шектеулер.</b> Бұл бір сессиядағы жедел әсер, ұзақ мерзімді нәтиже емес. 29 бала — шағын іріктеме. Жүріс фигурасы — орташа бұрыштардан құрылған схема, 3D қалпына келтіру емес.</p>
+  <div class="pnum" style="color:#5D6280">8</div>
+</section>
+
+<!-- 9 -->
+<section class="slide light">
+  <h2>Платформаны таныстыру</h2>
+  <div class="rule"></div>
+  <div class="steps9">
+    <div><b>01</b><h3>Деректерді ашу</h3><p>Зерттеу деректері бір батырмамен ашылады немесе үш CSV файлы жүктеледі.</p></div>
+    <div><b>02</b><h3>Баланы таңдау</h3><p>Көрсеткіштер, қисықтар, жүріс анимациясы және ЖИ қорытындысы.</p></div>
+    <div><b>03</b><h3>Нәтиже</h3><p>ЖИ модельдің адал метрикалары және басып шығаруға дайын есеп.</p></div>
+  </div>
+  <div class="links">
+    <div>Сайт<a href="https://asylbolatkhan.github.io/asyl-ai/">asylbolatkhan.github.io/asyl-ai</a></div>
+    <div>Код<a href="https://github.com/asylbolatkhan/asyl-ai">github.com/asylbolatkhan/asyl-ai</a></div>
+  </div>
+  <img class="shot" src="shots/gait.png" style="position:absolute;right:110px;bottom:70px;width:900px" alt="Жүріс анимациясы">
+  <div class="pnum" style="color:#5D6280">9</div>
+</section>
+
+<!-- 10 -->
+<section class="slide s10 bg-path">
+  <h2>Қорытынды</h2>
+  <div class="rule"></div>
+  <div class="cols">
+    <div>
+      <p>Asyl AI жүріс деректерін бірнеше минутта түсінікті қорытындыға айналдырады.</p>
+      <p>Басты нәтиже: ұршық түзелді, бірақ бала мұны жамбасты еңкейту арқылы жасады.</p>
+      <p class="muted">Медициналық диагноз қоймайды, ем тағайындамайды.</p>
+    </div>
+    <div>
+      <h3>Деректер мен ЖИ құралдары</h3>
+      <ul>
+        <li><b>Деректер:</b> De Mulder T. et al., KU Leuven, 2024 (CC-BY-NC-SA-4.0)</li>
+        <li><b>GPT-5.4 (OpenAI):</b> дәрігерге арналған мәтін</li>
+        <li><b>Claude Code (Anthropic):</b> код пен талдауға көмек</li>
+        <li><b>Иллюстрациялар:</b> ЖИ арқылы жасалған</li>
+        <li><b>Кітапханалар:</b> pandas, SciPy, scikit-learn, Plotly</li>
+      </ul>
+    </div>
+  </div>
+  <img class="cut" src="img/wire.png" style="right:60px;top:40px;height:1000px;opacity:.9" alt="">
+  <div class="thanks">Рақмет! Сұрақтарыңызға қуана жауап береміз.</div>
+</section>
+
+</body>
+</html>
